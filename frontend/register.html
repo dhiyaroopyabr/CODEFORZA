@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — College CP</title>
+  <meta name="description" content="Create a new College CP account.">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card">
+
+    <div class="auth-brand">
+      <div class="auth-brand-icon">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
+      </div>
+      <h1>Join College CP</h1>
+      <p>Create your competitive programming account</p>
+    </div>
+
+    <form id="register-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input class="form-control" id="username" type="text"
+          placeholder="cool_coder_42" autocomplete="username" required>
+        <p class="form-hint">3–50 characters, letters / digits / underscore only.</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <input class="form-control" id="email" type="email"
+          placeholder="you@college.edu" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-control" id="password" type="password"
+          placeholder="Min. 8 chars, 1 letter, 1 digit" autocomplete="new-password" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="confirm-password">Confirm Password</label>
+        <input class="form-control" id="confirm-password" type="password"
+          placeholder="••••••••" autocomplete="new-password" required>
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" type="submit" id="register-btn">
+        <span class="btn-text">Create Account</span>
+      </button>
+    </form>
+
+    <hr class="divider">
+    <p style="text-align:center; color:var(--text-secondary); font-size:0.875rem">
+      Already have an account?
+      <a href="/index.html">Sign in →</a>
+    </p>
+
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="/static/app.js"></script>
+<script>
+  if (getToken() && getUser()) window.location.replace('/dashboard.html');
+
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn    = document.getElementById('register-btn');
+    const pass   = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm-password').value;
+
+    if (pass !== confirm) {
+      showToast('Passwords do not match', 'error');
+      return;
+    }
+
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    try {
+      await apiFetch('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: document.getElementById('username').value.trim(),
+          email:    document.getElementById('email').value.trim(),
+          password: pass,
+        }),
+      });
+      showToast('Account created! Please log in.', 'success');
+      setTimeout(() => window.location.href = '/index.html', 1000);
+    } catch (err) {
+      showToast(err.message, 'error');
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

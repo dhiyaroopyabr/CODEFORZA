@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — College CP</title>
+  <meta name="description" content="Admin panel for managing users and problems.">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<!-- ── Navbar ────────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <a class="navbar-brand" href="/dashboard.html">
+    <div class="brand-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+      </svg>
+    </div>
+    <span class="brand-name">College CP</span>
+  </a>
+  <ul class="navbar-nav">
+    <li><a href="/dashboard.html" data-page="dashboard">Problems</a></li>
+    <li><a href="/admin.html" data-page="admin" class="active" id="admin-nav-link">Admin</a></li>
+  </ul>
+  <div class="navbar-spacer"></div>
+  <div id="user-pill" class="user-pill"></div>
+  <button class="btn btn-ghost btn-sm" id="logout-btn">Logout</button>
+</nav>
+
+<!-- ── Main ──────────────────────────────────────────────────────────────── -->
+<div class="container page-content">
+
+  <div class="page-header">
+    <div class="page-header-row">
+      <div>
+        <h1>Admin Panel</h1>
+        <p>Manage problems and users</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div id="admin-tabs" class="tabs">
+    <button class="tab-btn active" data-tab="tab-problems">🧩 Problems</button>
+    <button class="tab-btn" data-tab="tab-users">👤 Users</button>
+    <button class="tab-btn" data-tab="tab-add-problem">➕ Add Problem</button>
+  </div>
+
+  <!-- ── Tab: Problems ─────────────────────────────────────────────────── -->
+  <div class="tab-panel active" id="tab-problems">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">All Problems</span>
+        <button class="btn btn-primary btn-sm" onclick="switchTab('tab-add-problem')">+ Add Problem</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Title</th><th>Difficulty</th><th>Time Limit</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="admin-problems-tbody">
+            <tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">⏳</div><h3>Loading…</h3></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tab: Users ────────────────────────────────────────────────────── -->
+  <div class="tab-panel" id="tab-users">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">All Users</span>
+        <span id="user-count" style="color:var(--text-muted);font-size:0.85rem"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="admin-users-tbody">
+            <tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">⏳</div><h3>Loading…</h3></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tab: Add Problem ───────────────────────────────────────────────── -->
+  <div class="tab-panel" id="tab-add-problem">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Create New Problem</span></div>
+      <div class="card-body">
+        <form id="add-problem-form">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Title</label>
+              <input class="form-control" id="p-title" type="text" placeholder="Problem title" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Difficulty (800–3500)</label>
+              <input class="form-control" id="p-difficulty" type="number" min="800" max="3500" step="100" value="1000">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Time Limit (seconds)</label>
+              <input class="form-control" id="p-time-limit" type="number" min="0.5" max="10" step="0.5" value="2">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Memory Limit (MB)</label>
+              <input class="form-control" id="p-memory" type="number" min="64" max="1024" step="64" value="256">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Problem Statement</label>
+              <textarea class="form-control" id="p-statement" rows="5" placeholder="Describe the problem clearly…" required></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Input Format</label>
+              <textarea class="form-control" id="p-input-format" rows="3" placeholder="Describe the input format…"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Output Format</label>
+              <textarea class="form-control" id="p-output-format" rows="3" placeholder="Describe the expected output…"></textarea>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Constraints</label>
+              <textarea class="form-control" id="p-constraints" rows="2" placeholder="e.g. 1 ≤ N ≤ 10^5"></textarea>
+            </div>
+          </div>
+
+          <!-- Test Cases -->
+          <div style="margin-top:1rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+              <label class="form-label" style="margin:0">Test Cases</label>
+              <button type="button" class="btn btn-ghost btn-sm" id="add-tc-btn">+ Add Test Case</button>
+            </div>
+            <div class="tc-list" id="tc-list"></div>
+            <p class="form-hint">At least one test case recommended. Mark as "Sample" to show it to contestants.</p>
+          </div>
+
+          <div style="margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:flex-end">
+            <button type="button" class="btn btn-ghost" onclick="resetProblemForm()">Clear</button>
+            <button type="submit" class="btn btn-primary" id="create-problem-btn">
+              <span class="btn-text">Create Problem</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Confirm delete modal ───────────────────────────────────────────────── -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">⚠️ Confirm Delete</span>
+      <button class="modal-close" onclick="closeModal('confirm-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-msg" style="color:var(--text-secondary)"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('confirm-modal')">Cancel</button>
+      <button class="btn btn-danger" id="confirm-yes-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="/static/app.js"></script>
+<script>
+// ── Auth ──────────────────────────────────────────────────────────────────
+const currentUser = requireAuth(true); // admin only
+if (currentUser) initNavbar('admin');
+
+// ── Tab system ────────────────────────────────────────────────────────────
+document.querySelectorAll('#admin-tabs .tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+function switchTab(tabId) {
+  document.querySelectorAll('#admin-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
+  document.getElementById(tabId)?.classList.add('active');
+}
+
+// ── Load data ─────────────────────────────────────────────────────────────
+let _allUsers    = [];
+let _allProblems = [];
+
+async function loadAll() {
+  try {
+    [_allProblems, _allUsers] = await Promise.all([
+      apiFetch('/api/problems/'),
+      apiFetch('/api/users/'),
+    ]);
+    renderProblems(_allProblems);
+    renderUsers(_allUsers);
+  } catch (err) {
+    showToast('Failed to load data: ' + err.message, 'error');
+  }
+}
+
+// ── Problems table ────────────────────────────────────────────────────────
+function renderProblems(problems) {
+  const tbody = document.getElementById('admin-problems-tbody');
+  if (!problems.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">📋</div><h3>No problems yet</h3></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = problems.map((p, i) => `
+    <tr>
+      <td style="color:var(--text-muted)">${i+1}</td>
+      <td><a href="/problem.html?id=${p.id}" style="color:var(--text-primary);font-weight:600">${escHtml(p.title)}</a></td>
+      <td>${diffBadge(p.difficulty)}</td>
+      <td style="font-family:var(--font-code);font-size:0.82rem">${p.time_limit}s</td>
+      <td>
+        <button class="btn btn-danger btn-sm" onclick="confirmDeleteProblem('${p.id}', '${escAttr(p.title)}')">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ── Users table ───────────────────────────────────────────────────────────
+function renderUsers(users) {
+  document.getElementById('user-count').textContent = `${users.length} user${users.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('admin-users-tbody');
+  if (!users.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">👤</div><h3>No users</h3></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td style="color:var(--text-primary);font-weight:500">${escHtml(u.username)}</td>
+      <td style="color:var(--text-secondary)">${escHtml(u.email)}</td>
+      <td>
+        <select class="form-control" style="width:110px;padding:0.3rem 0.5rem"
+          onchange="changeRole('${u.id}', this.value)"
+          ${u.id === currentUser.id ? 'disabled title="Cannot change your own role"' : ''}>
+          <option value="user"  ${u.role==='user'  ? 'selected' : ''}>User</option>
+          <option value="admin" ${u.role==='admin' ? 'selected' : ''}>Admin</option>
+        </select>
+      </td>
+      <td>
+        <span class="badge ${u.is_active ? 'badge-active' : 'badge-inactive'}">
+          ${u.is_active ? 'Active' : 'Inactive'}
+        </span>
+      </td>
+      <td style="color:var(--text-muted);font-size:0.82rem">${fmtDateShort(u.created_at)}</td>
+      <td>
+        <button class="btn btn-danger btn-sm"
+          onclick="confirmDeactivateUser('${u.id}', '${escAttr(u.username)}')"
+          ${u.id === currentUser.id ? 'disabled title="Cannot deactivate yourself"' : ''}
+          ${!u.is_active ? 'disabled' : ''}>
+          Deactivate
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ── Role change ───────────────────────────────────────────────────────────
+async function changeRole(userId, role) {
+  try {
+    await apiFetch(`/api/users/${userId}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role }),
+    });
+    showToast(`Role updated to ${role}`, 'success');
+  } catch (err) {
+    showToast('Failed: ' + err.message, 'error');
+    loadAll(); // revert
+  }
+}
+
+// ── Confirm delete / deactivate ───────────────────────────────────────────
+let _pendingAction = null;
+function confirmDeleteProblem(id, title) {
+  document.getElementById('confirm-msg').textContent =
+    `Delete problem "${title}"? This will also delete all its test cases and submissions.`;
+  _pendingAction = () => deleteProblem(id);
+  openModal('confirm-modal');
+}
+function confirmDeactivateUser(id, username) {
+  document.getElementById('confirm-msg').textContent =
+    `Deactivate user "${username}"? They will no longer be able to log in.`;
+  _pendingAction = () => deactivateUser(id);
+  openModal('confirm-modal');
+}
+document.getElementById('confirm-yes-btn').addEventListener('click', async () => {
+  closeModal('confirm-modal');
+  if (_pendingAction) { await _pendingAction(); _pendingAction = null; }
+});
+
+async function deleteProblem(id) {
+  try {
+    await apiFetch(`/api/problems/${id}`, { method: 'DELETE' });
+    showToast('Problem deleted', 'success');
+    _allProblems = _allProblems.filter(p => p.id !== id);
+    renderProblems(_allProblems);
+  } catch (err) {
+    showToast('Delete failed: ' + err.message, 'error');
+  }
+}
+async function deactivateUser(id) {
+  try {
+    await apiFetch(`/api/users/${id}`, { method: 'DELETE' });
+    showToast('User deactivated', 'success');
+    const u = _allUsers.find(u => u.id === id);
+    if (u) u.is_active = false;
+    renderUsers(_allUsers);
+  } catch (err) {
+    showToast('Failed: ' + err.message, 'error');
+  }
+}
+
+// ── Test cases for Add Problem ────────────────────────────────────────────
+let tcCount = 0;
+function addTestCase(inputVal = '', outputVal = '', sample = false) {
+  tcCount++;
+  const id = tcCount;
+  const div = document.createElement('div');
+  div.className = 'tc-item';
+  div.id = `tc-${id}`;
+  div.innerHTML = `
+    <div>
+      <label class="form-label">Input</label>
+      <textarea class="form-control tc-input" rows="3" placeholder="Input data…" spellcheck="false">${escHtml(inputVal)}</textarea>
+    </div>
+    <div>
+      <label class="form-label">Expected Output</label>
+      <textarea class="form-control tc-output" rows="3" placeholder="Expected output…" spellcheck="false">${escHtml(outputVal)}</textarea>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.5rem;padding-top:1.6rem">
+      <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;color:var(--text-secondary);cursor:pointer">
+        <input type="checkbox" ${sample ? 'checked' : ''} class="tc-sample"> Sample
+      </label>
+      <button type="button" class="btn btn-danger btn-sm tc-remove" onclick="document.getElementById('tc-${id}').remove()">✕</button>
+    </div>
+  `;
+  document.getElementById('tc-list').appendChild(div);
+}
+document.getElementById('add-tc-btn').addEventListener('click', () => addTestCase());
+// Start with one empty test case
+addTestCase();
+
+// ── Add Problem form submit ───────────────────────────────────────────────
+document.getElementById('add-problem-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('create-problem-btn');
+  btn.classList.add('loading'); btn.disabled = true;
+
+  // Collect test cases
+  const testCases = [];
+  document.querySelectorAll('#tc-list .tc-item').forEach(item => {
+    const inp = item.querySelector('.tc-input').value.trim();
+    const out = item.querySelector('.tc-output').value.trim();
+    const isSample = item.querySelector('.tc-sample').checked;
+    if (inp || out) testCases.push({ input_data: inp, expected_output: out, is_sample: isSample });
+  });
+
+  const body = {
+    title:         document.getElementById('p-title').value.trim(),
+    statement:     document.getElementById('p-statement').value.trim(),
+    input_format:  document.getElementById('p-input-format').value.trim() || null,
+    output_format: document.getElementById('p-output-format').value.trim() || null,
+    constraints:   document.getElementById('p-constraints').value.trim() || null,
+    difficulty:    parseInt(document.getElementById('p-difficulty').value),
+    time_limit:    parseFloat(document.getElementById('p-time-limit').value),
+    memory_limit:  parseInt(document.getElementById('p-memory').value),
+    test_cases:    testCases,
+  };
+
+  try {
+    const created = await apiFetch('/api/problems/', { method: 'POST', body: JSON.stringify(body) });
+    showToast(`Problem "${created.title}" created!`, 'success');
+    resetProblemForm();
+    _allProblems.unshift(created);
+    renderProblems(_allProblems);
+    switchTab('tab-problems');
+  } catch (err) {
+    showToast('Error: ' + err.message, 'error');
+  } finally {
+    btn.classList.remove('loading'); btn.disabled = false;
+  }
+});
+
+function resetProblemForm() {
+  document.getElementById('add-problem-form').reset();
+  document.getElementById('tc-list').innerHTML = '';
+  tcCount = 0;
+  addTestCase();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function escAttr(s) {
+  return String(s ?? '').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>

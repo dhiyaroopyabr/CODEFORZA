@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — College CP</title>
+  <meta name="description" content="Sign in to your College CP competitive programming account.">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card">
+
+    <!-- Brand -->
+    <div class="auth-brand">
+      <div class="auth-brand-icon">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
+      </div>
+      <h1>College CP</h1>
+      <p>Competitive Programming Platform</p>
+    </div>
+
+    <!-- Login form -->
+    <form id="login-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input class="form-control" id="username" type="text"
+          placeholder="your_username" autocomplete="username" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-control" id="password" type="password"
+          placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" type="submit" id="login-btn">
+        <span class="btn-text">Sign In</span>
+      </button>
+    </form>
+
+    <hr class="divider">
+    <p style="text-align:center; color:var(--text-secondary); font-size:0.875rem">
+      Don't have an account?
+      <a href="/register.html">Create one →</a>
+    </p>
+
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="/static/app.js"></script>
+<script>
+  // Already logged in → go to dashboard
+  if (getToken() && getUser()) window.location.replace('/dashboard.html');
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('login-btn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    try {
+      const data = await apiFetch('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: document.getElementById('username').value.trim(),
+          password: document.getElementById('password').value,
+        }),
+      });
+      if (!data) return;
+      setToken(data.access_token);
+      setUser(data.user);
+      showToast(`Welcome back, ${data.user.username}! 🎉`, 'success');
+      setTimeout(() => window.location.href = '/dashboard.html', 600);
+    } catch (err) {
+      showToast(err.message, 'error');
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
